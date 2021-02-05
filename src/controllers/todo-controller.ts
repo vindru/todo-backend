@@ -6,7 +6,11 @@ import {
   ValidationFailure,
 } from "@typings";
 import { NextFunction, Router, Response } from "express";
-import { createTodoValidator, updateTodoValidator } from "@validators";
+import {
+  createTodoValidator,
+  deleteTodoValidator,
+  updateTodoValidator,
+} from "@validators";
 import { BaseController } from "./base-controller";
 import { Todo } from "@models";
 
@@ -30,6 +34,12 @@ export class TodoController extends BaseController {
       `${this.basePath}/:id`,
       updateTodoValidator(this.appContext),
       this.updateTodo
+    );
+
+    this.router.delete(
+      `${this.basePath}/:id`,
+      deleteTodoValidator(this.appContext),
+      this.deleteTodo
     );
   }
 
@@ -74,15 +84,45 @@ export class TodoController extends BaseController {
       );
       return next(valError);
     }
-    const { id } = req.params;
+
     const { title } = req.body;
+    const { id } = req.params;
+
     const todo = await this.appContext.todoRepository.update(
-      { _id: id },
+      { _id: id, isDeleted: false, deletedAt: null },
       { $set: { title: title } }
     );
 
     if (todo._id) {
       res.status(200).json(todo.serialize());
+    } else {
+      res.status(404).send();
+    }
+  };
+
+  private deleteTodo = async (
+    req: ExtendedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const failures: ValidationFailure[] = Validation.extractValidationErrors(
+      req
+    );
+
+    if (failures.length > 0) {
+      const valError = new Errors.ValidationError(
+        res.__("VALIDATION_ERRORS.INVALID_ID"),
+        failures
+      );
+      return next(valError);
+    }
+    const { id } = req.params;
+    const todo = await this.appContext.todoRepository.update(
+      { _id: id, isDeleted: false, deletedAt: null },
+      { $set: { isDeleted: true, deletedAt: new Date() } }
+    );
+    if (todo._id) {
+      res.status(204).send();
     } else {
       res.status(404).send();
     }

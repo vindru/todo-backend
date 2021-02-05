@@ -94,7 +94,44 @@ describe("PUT /todos/:id", () => {
     await chai.request(expressApp).delete(`/todos/${resCreate.body.id}`);
     const resUpdated = await chai
       .request(expressApp)
-      .put(`/todos/${resCreate.body.id}`);
+      .put(`/todos/${resCreate.body.id}`)
+      .send({
+        title: "Updated title",
+      });
     expect(resUpdated).to.have.status(404);
+  });
+});
+
+describe('DELETE /todos/:id', () => {
+  it('should return 404 if id is empty.', async () => {
+    const res = await chai.request(expressApp).delete('/todos/');
+
+    expect(res).to.have.status(404);
+  });
+
+  it('should return 204 if id exists', async () => {
+    const resCreate = await chai
+      .request(expressApp)
+      .post('/todos')
+      .send({
+        title: 'Adding first title',
+      });
+
+    const resDelete = await chai.request(expressApp).delete(`/todos/${resCreate.body.id}`);
+
+    expect(resDelete).to.have.status(204);
+  });
+
+  it('should return 404 if todo dont exists', async () => {
+    const resCreate = await chai
+      .request(expressApp)
+      .post('/todos')
+      .send({
+        title: 'Adding first title',
+      });
+
+    await chai.request(expressApp).delete(`/todos/${resCreate.body.id}`);
+    const resDelete2 = await chai.request(expressApp).delete(`/todos/${resCreate.body.id}`);
+    expect(resDelete2).to.have.status(404);
   });
 });
