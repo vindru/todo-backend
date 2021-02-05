@@ -36,9 +36,10 @@ describe('POST /todos', () => {
     expect(res).to.have.status(201);
     expect(res.body).to.have.property('id');
     expect(res.body).to.have.property('title');
+    expect(res.body.title).to.equal('Adding first title');
   });
 
-  it('should return a validation error if tile is empty string.', async () => {
+  it('should return a validation error if title is empty string.', async () => {
     const res = await chai
       .request(expressApp)
       .post('/todos')
@@ -47,6 +48,6 @@ describe('POST /todos', () => {
       });
 
     expect(res).to.have.status(400);
-    expect(res.body.message).to.equal('Please provide a title.');
+    expect(res.body.failures).to.have.deep.members([{ field: 'title', message: 'Please provide a title.' }]);
   });
 });
