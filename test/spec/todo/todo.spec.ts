@@ -71,7 +71,7 @@ describe("PUT /todos/:id", () => {
     expect(res).to.have.status(404);
   });
 
-  it("should return 204 if id exists", async () => {
+  it("should return 204 if todo id exists", async () => {
     const resCreate = await chai.request(expressApp).post("/todos").send({
       title: "Adding first title",
     });
@@ -86,7 +86,7 @@ describe("PUT /todos/:id", () => {
     expect(resUpdate.body.title).to.equal("Updated title");
   });
 
-  it("should return 404 if todo dont exists", async () => {
+  it("should return 404 if todo id dont exists", async () => {
     const resCreate = await chai.request(expressApp).post("/todos").send({
       title: "Adding first title",
     });
