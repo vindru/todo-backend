@@ -26,12 +26,9 @@ before(async () => {
 
 describe('POST /todos', () => {
   it('should create a todo when non empty title passed ', async () => {
-    const res = await chai
-      .request(expressApp)
-      .post('/todos')
-      .send({
-        title: 'Adding first title',
-      });
+    const res = await chai.request(expressApp).post('/todos').send({
+      title: 'Adding first title',
+    });
 
     expect(res).to.have.status(201);
     expect(res.body).to.have.property('id');
@@ -40,14 +37,47 @@ describe('POST /todos', () => {
   });
 
   it('should return a validation error if title is empty string.', async () => {
-    const res = await chai
+    const res = await chai.request(expressApp).post('/todos').send({
+      title: '',
+    });
+
+    expect(res).to.have.status(400);
+    expect(res.body.failures).to.have.deep.members([
+      { field: 'title', message: 'Please provide a title.' },
+    ]);
+  });
+});
+
+describe('DELETE /todos/:id', () => {
+  it('should return 404 if id is empty.', async () => {
+    const res = await chai.request(expressApp).delete('/todos/');
+
+    expect(res).to.have.status(404);
+  });
+
+  it('should return 204 if id exists', async () => {
+    const resCreate = await chai
       .request(expressApp)
       .post('/todos')
       .send({
-        title: '',
+        title: 'Adding first title',
       });
 
-    expect(res).to.have.status(400);
-    expect(res.body.failures).to.have.deep.members([{ field: 'title', message: 'Please provide a title.' }]);
+    const resDelete = await chai.request(expressApp).delete(`/todos/${resCreate.body.id}`);
+
+    expect(resDelete).to.have.status(204);
+  });
+
+  it('should return 404 if todo dont exists', async () => {
+    const resCreate = await chai
+      .request(expressApp)
+      .post('/todos')
+      .send({
+        title: 'Adding first title',
+      });
+
+    await chai.request(expressApp).delete(`/todos/${resCreate.body.id}`);
+    const resDelete2 = await chai.request(expressApp).delete(`/todos/${resCreate.body.id}`);
+    expect(resDelete2).to.have.status(404);
   });
 });
