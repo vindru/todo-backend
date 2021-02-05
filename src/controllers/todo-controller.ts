@@ -66,7 +66,7 @@ export class TodoController extends BaseController {
     const failures: ValidationFailure[] = Validation.extractValidationErrors(
       req,
     );
-    
+
     if (failures.length > 0) {
       const valError = new Errors.ValidationError(
         res.__('VALIDATION_ERRORS.INVALID_ID'),
@@ -76,14 +76,14 @@ export class TodoController extends BaseController {
     }
     const { id } = req.params;
     const todo = await this.appContext.todoRepository.update(
-        { _id: id, isDeleted: false, deletedAt: null},
-        {$set :{ isDeleted: true, deletedAt: new Date() } }
+        { _id: id, isDeleted: false, deletedAt: null },
+        { $set :{ isDeleted: true, deletedAt: new Date() } },
     );
-    if(todo._id){
+    if (todo._id) {
       res.status(204).send();
-    }else{
+    }else {
       res.status(404).send();
     }
-    
+
   }
 }

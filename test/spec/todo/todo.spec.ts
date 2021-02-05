@@ -1,15 +1,15 @@
 // tslint:disable-next-line: no-var-requires
-require("module-alias/register");
+require('module-alias/register');
 
-import chai from "chai";
+import chai from 'chai';
 // tslint:disable-next-line: import-name
-import spies from "chai-spies";
+import spies from 'chai-spies';
 chai.use(spies);
-import chaiHttp from "chai-http";
-import { Application } from "express";
-import { respositoryContext, testAppContext } from "../../mocks/app-context";
+import chaiHttp from 'chai-http';
+import { Application } from 'express';
+import { respositoryContext, testAppContext } from '../../mocks/app-context';
 
-import { App } from "../../../src/server";
+import { App } from '../../../src/server';
 
 chai.use(chaiHttp);
 const expect = chai.expect;
@@ -24,56 +24,56 @@ before(async () => {
   expressApp = app.expressApp;
 });
 
-describe("POST /todos", () => {
-  it("should create a todo when non empty title passed ", async () => {
-    const res = await chai.request(expressApp).post("/todos").send({
-      title: "Adding first title",
+describe('POST /todos', () => {
+  it('should create a todo when non empty title passed ', async () => {
+    const res = await chai.request(expressApp).post('/todos').send({
+      title: 'Adding first title',
     });
 
     expect(res).to.have.status(201);
-    expect(res.body).to.have.property("id");
-    expect(res.body).to.have.property("title");
-    expect(res.body.title).to.equal("Adding first title");
+    expect(res.body).to.have.property('id');
+    expect(res.body).to.have.property('title');
+    expect(res.body.title).to.equal('Adding first title');
   });
 
-  it("should return a validation error if title is empty string.", async () => {
-    const res = await chai.request(expressApp).post("/todos").send({
-      title: "",
+  it('should return a validation error if title is empty string.', async () => {
+    const res = await chai.request(expressApp).post('/todos').send({
+      title: '',
     });
 
     expect(res).to.have.status(400);
     expect(res.body.failures).to.have.deep.members([
-      { field: "title", message: "Please provide a title." },
+      { field: 'title', message: 'Please provide a title.' },
     ]);
   });
 });
 
-describe("DELETE /todos/:id", () => {
-  it("should return 404 if id is empty.", async () => {
-    const res = await chai.request(expressApp).delete("/todos/");
+describe('DELETE /todos/:id', () => {
+  it('should return 404 if id is empty.', async () => {
+    const res = await chai.request(expressApp).delete('/todos/');
 
     expect(res).to.have.status(404);
   });
 
-  it("should return 204 if id exists", async () => {
+  it('should return 204 if id exists', async () => {
     const resCreate = await chai
       .request(expressApp)
-      .post("/todos")
+      .post('/todos')
       .send({
-        title: "Adding first title",
+        title: 'Adding first title',
       });
 
     const resDelete = await chai.request(expressApp).delete(`/todos/${resCreate.body.id}`);
-    console.log(resDelete.body.id);
+
     expect(resDelete).to.have.status(204);
   });
 
-  it("should return 404 if todo dont exists", async () => {
+  it('should return 404 if todo dont exists', async () => {
     const resCreate = await chai
       .request(expressApp)
-      .post("/todos")
+      .post('/todos')
       .send({
-        title: "Adding first title",
+        title: 'Adding first title',
       });
 
     await chai.request(expressApp).delete(`/todos/${resCreate.body.id}`);
